@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Performance Hub — Marcela Silva</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/png" href="logo-m.png" />
+</head>
+<body class="detail">
+
+  <div class="bg-orb" aria-hidden="true"></div>
+  <div class="bg-orb two" aria-hidden="true"></div>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div id="cursor-ring" class="hidden" aria-hidden="true"></div>
+  <div id="cursor-dot" class="hidden" aria-hidden="true"></div>
+
+  <nav class="topnav">
+    <div class="container">
+      <a href="index.html" class="nav-logo">
+        <span class="m-mark" style="background-image:url('logo-m.png')" aria-hidden="true"></span>
+        <span class="full">MARCELA SILVA</span>
+        <span class="short">MS.</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html#hero">início</a></li>
+        <li><a href="index.html#sobre">sobre</a></li>
+        <li><a href="index.html#projetos" class="active">projetos</a></li>
+        <li><a href="index.html#contato">contato</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section id="hero">
+    <div class="container">
+      <a href="index.html#projetos" class="back-link">← Voltar aos projetos</a>
+
+      <div class="detail-header" data-reveal>
+        <div class="num">// 03 — Performance Hub</div>
+        <h1>Gamificação<br>auditável.</h1>
+        <div class="tech">
+          <span class="badge">FastAPI</span>
+          <span class="badge">MySQL</span>
+          <span class="badge">React</span>
+          <span class="badge">Power BI</span>
+          <span class="badge">Supabase</span>
+        </div>
+      </div>
+
+      <div class="detail-hero-img" data-reveal>
+        <img src="performance-hub.svg" alt="Sistema Performance Hub" />
+      </div>
+
+      <div class="detail-section" data-reveal>
+        <div class="label">Contexto</div>
+        <div class="body">
+          <p>
+            Operação com <strong>100+ consultores</strong> precisava de um
+            sistema para apurar e exibir desempenho em tempo real,
+            gamificando metas individuais e de equipe. O processo legado
+            envolvia <strong>30 minutos de fechamento manual</strong> por
+            ciclo, planilhas Excel transitando por email e zero
+            rastreabilidade.
+          </p>
+        </div>
+      </div>
+
+      <div class="detail-section" data-reveal>
+        <div class="label">A solução</div>
+        <div class="body">
+          <p>
+            Backend em <code>FastAPI</code> + <code>MySQL</code> com
+            ~80 endpoints, frontend em React e camada analítica em Web.
+            A regra-chave: todo evento que afeta score é
+            <strong>imutável</strong> — fica gravado, com hash, autor e
+            timestamp. Correções viram <em>novos</em> eventos.
+          </p>
+          <pre class="code-block">
+<span class="token-comment"># FastAPI — evento de pontuacao imutavel</span>
+<span class="token-keyword">class</span> ScoreEvent(BaseModel):
+    consultor_id: <span class="token-keyword">int</span>
+    delta: <span class="token-keyword">int</span>
+    reason: ScoreReason
+    actor_id: <span class="token-keyword">int</span>
+    metadata: dict = {}
+
+<span class="token-function">@router.post</span>(<span class="token-string">"/scores/events"</span>)
+<span class="token-keyword">def</span> <span class="token-function">post_event</span>(ev: ScoreEvent, db: Session = Depends(get_db)):
+    record = <span class="token-function">build_record</span>(ev, db)
+    record.signature = <span class="token-function">sha256_payload</span>(record)   <span class="token-comment"># assinatura</span>
+    db.<span class="token-function">add</span>(record)
+    db.<span class="token-function">commit</span>()
+    <span class="token-function">broadcast</span>(record)                            <span class="token-comment"># supabase realtime</span>
+    <span class="token-keyword">return</span> record</pre>
+        </div>
+      </div>
+
+      <div class="detail-section" data-reveal>
+        <div class="label">Destaques técnicos</div>
+        <div class="body">
+          <h3>Realtime sem dor</h3>
+          <p>
+            Cada evento publicado dispara um <code>broadcast</code> via
+            Supabase Realtime. O front aplica o delta sem refazer
+            requisições — a UI atualiza em <span style="color:var(--cyan)">~200ms</span>
+            do fato à tela.
+          </p>
+          <h3>Auditoria como contrato</h3>
+          <ul>
+            <li>Eventos imutáveis com assinatura SHA-256 do payload.</li>
+            <li>Reversões são novos eventos, nunca <code>DELETE</code>.</li>
+            <li>Auditor consegue reconstruir qualquer ranking histórico.</li>
+            <li>Fechamento de ciclo é uma <em>view</em>, não uma rotina.</li>
+          </ul>
+          <h3>Power BI como camada de leitura</h3>
+          <p>
+            Os dashboards de supervisão consomem uma view materializada
+            do MySQL via gateway. O BI nunca escreve, nunca calcula
+            score — só lê.
+          </p>
+        </div>
+      </div>
+
+      <div class="detail-section" data-reveal>
+        <div class="label">Impacto</div>
+        <div class="body">
+          <div class="impact-grid-detail">
+            <div class="card"><div class="v">30min → 2s</div><div class="l">fechamento<br>por ciclo</div></div>
+            <div class="card"><div class="v">150+</div><div class="l">consultores<br>com ranking ao vivo</div></div>
+            <div class="card"><div class="v">~80</div><div class="l">endpoints<br>versionados</div></div>
+          </div>
+          <p>
+            O ganho mais inesperado foi cultural: com o ranking visível e
+            verificável, o time parou de questionar o número e começou a
+            disputar a posição.
+          </p>
+        </div>
+      </div>
+
+      <div class="detail-nav">
+        <a href="associacao-bi.html"><span class="hint">/// anterior</span>← BI Associação</a>
+        <a href="contrax.html"><span class="hint">/// próximo</span>ContraX Extract →</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">
+      <span class="logo-mark">MARCELA SILVA</span>
+      <span>Feito com dados e intenção.</span>
+      <span>© <span id="year">2026</span> Marcela Silva</span>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BI Associação — Marcela Silva</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/png" href="logo-m.png" />
+</head>
+<body class="detail">
+
+  <div class="bg-orb" aria-hidden="true"></div>
+  <div class="bg-orb two" aria-hidden="true"></div>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div id="cursor-ring" class="hidden" aria-hidden="true"></div>
+  <div id="cursor-dot" class="hidden" aria-hidden="true"></div>
+
+  <nav class="topnav">
+    <div class="container">
+      <a href="index.html" class="nav-logo">
+        <span class="m-mark" style="background-image:url('logo-m.png')" aria-hidden="true"></span>
+        <span class="full">MARCELA SILVA</span>
+        <span class="short">MS.</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html#hero">início</a></li>
+        <li><a href="index.html#sobre">sobre</a></li>
+        <li><a href="index.html#projetos" class="active">projetos</a></li>
+        <li><a href="index.html#contato">contato</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section id="hero">
+    <div class="container">
+      <a href="index.html#projetos" class="back-link">← Voltar aos projetos</a>
+
+      <div class="detail-header" data-reveal>
+        <div class="num">// 02 — BI Associação</div>
+        <h1>Financeiro &amp;<br>Comercial.</h1>
+        <div class="tech">
+          <span class="badge">Power BI</span>
+          <span class="badge">DAX</span>
+          <span class="badge">Python</span>
+          <span class="badge">pdfplumber</span>
+        </div>
+      </div>
+
+      <div class="detail-hero-img" data-reveal>
+        <img src="associacao-bi.svg" alt="Dashboard BI Associação" />
+      </div>
+
+      <div class="detail-section" data-reveal>
+        <div class="label">Contexto</div>
+        <div class="body">
+          <p>
+            Uma das maiores associações de proteção veicular do Brasil
+            precisava acompanhar saúde financeira e desempenho comercial
+            em <strong>tempo quase real</strong>, com rateio proporcional
+            de custos de operação entre diferentes linhas de produto.
+          </p>
+          <p>
+            A entrada de dados vinha em PDFs — <em>literalmente</em>
+            contracheques, faturas e extratos. O time financeiro
+            digitava manualmente.
+          </p>
+        </div>
+      </div>
+
+      <div class="detail-section" data-reveal>
+        <div class="label">A solução</div>
+        <div class="body">
+          <p>
+            Pipeline em duas camadas: um script Python com
+            <code>pdfplumber</code> extrai os campos relevantes,
+            normaliza e grava no warehouse; o Power BI consome
+            essa camada já limpa.
+          </p>
+          <pre class="code-block">
+<span class="token-comment"># pipeline.py — orquestracao</span>
+<span class="token-keyword">def</span> <span class="token-function">run</span>(folder: Path) -> ReportLog:
+    pdfs = <span class="token-function">discover</span>(folder)
+    rows = []
+    <span class="token-keyword">for</span> pdf <span class="token-keyword">in</span> pdfs:
+        record = <span class="token-function">extract</span>(pdf)        <span class="token-comment"># pdfplumber + regex</span>
+        <span class="token-function">validate</span>(record)             <span class="token-comment"># raise se inconsistente</span>
+        rows.<span class="token-function">append</span>(record)
+    <span class="token-function">load_to_dw</span>(rows, table=<span class="token-string">"f_lancamentos"</span>)
+    <span class="token-keyword">return</span> ReportLog(ok=<span class="token-function">len</span>(rows), failed=[...])</pre>
+          <p>
+            O rateio é uma medida DAX: usa
+            <code>ALLEXCEPT</code> para calcular a base proporcional
+            de custos por centro de receita e devolve a alocação
+            ao grão do lançamento.
+          </p>
+        </div>
+      </div>
+
+      <div class="detail-section" data-reveal>
+        <div class="label">Destaques técnicos</div>
+        <div class="body">
+          <h3>Rateio proporcional reverso</h3>
+          <p>
+            Custos compartilhados eram historicamente rateados
+            "por estimativa". A nova lógica calcula a participação
+            real do mês corrente em receita líquida e aplica de volta
+            sobre as despesas comuns.
+          </p>
+          <h3>Validação automática</h3>
+          <ul>
+            <li>Cada PDF passa por <code>validate()</code> antes de virar linha.</li>
+            <li>Inconsistências (bruto ≠ líquido + descontos) viram alertas no relatório.</li>
+            <li>Logs auditáveis: cada lançamento tem hash do PDF de origem.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="detail-section" data-reveal>
+        <div class="label">Impacto</div>
+        <div class="body">
+          <div class="impact-grid-detail">
+            <div class="card"><div class="v">100%</div><div class="l">lançamentos<br>com origem rastreável</div></div>
+            <div class="card"><div class="v">3 dias</div><div class="l">de digitação<br>eliminados por mês</div></div>
+            <div class="card"><div class="v">0</div><div class="l">erros de rateio<br>desde o lançamento</div></div>
+          </div>
+          <p>
+            O fechamento financeiro mensal — antes uma maratona
+            de planilhas — virou uma reunião de leitura. O time
+            financeiro deixou de "fechar" para começar a <strong>analisar</strong>.
+          </p>
+        </div>
+      </div>
+
+      <div class="detail-nav">
+        <a href="facilita-bi.html"><span class="hint">/// anterior</span>← Facilita BI</a>
+        <a href="performance-hub.html"><span class="hint">/// próximo</span>Performance Hub →</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">
+      <span class="logo-mark">MARCELA SILVA</span>
+      <span>Feito com dados e intenção.</span>
+      <span>© <span id="year">2026</span> Marcela Silva</span>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

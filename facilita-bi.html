@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Facilita BI — Marcela Silva</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/png" href="logo-m.png" />
+</head>
+<body class="detail">
+
+  <div class="bg-orb" aria-hidden="true"></div>
+  <div class="bg-orb two" aria-hidden="true"></div>
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <div id="cursor-ring" class="hidden" aria-hidden="true"></div>
+  <div id="cursor-dot" class="hidden" aria-hidden="true"></div>
+
+  <!-- NAV -->
+  <nav class="topnav">
+    <div class="container">
+      <a href="index.html" class="nav-logo">
+        <span class="m-mark" style="background-image:url('logo-m.png')" aria-hidden="true"></span>
+        <span class="full">MARCELA SILVA</span>
+        <span class="short">MS.</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html#hero">início</a></li>
+        <li><a href="index.html#sobre">sobre</a></li>
+        <li><a href="index.html#projetos" class="active">projetos</a></li>
+        <li><a href="index.html#contato">contato</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section id="hero">
+    <div class="container">
+      <a href="index.html#projetos" class="back-link">← Voltar aos projetos</a>
+
+      <div class="detail-header" data-reveal>
+        <div class="num">// 01 — Fac. BI</div>
+        <h1>Ecossistema<br>Analítico.</h1>
+        <div class="tech">
+          <span class="badge">Power BI</span>
+          <span class="badge">DAX</span>
+          <span class="badge">Power Query (M)</span>
+          <span class="badge">Excel</span>
+        </div>
+      </div>
+
+      <div class="detail-hero-img" data-reveal>
+        <img src="facilita-bi.svg" alt="Dashboard executivo Facilita BI" />
+      </div>
+
+      <!-- CONTEXTO -->
+      <div class="detail-section" data-reveal>
+        <div class="label">Contexto</div>
+        <div class="body">
+          <p>
+            Uma das maiores operações de telemarketing 0800 do Brasil precisava
+            entregar análise para <strong>três audiências diferentes</strong> usando
+            o mesmo modelo de dados: diretoria da operação, supervisores de
+            equipe e o cliente final (a associação contratante). Cada audiência
+            via números diferentes — e os dados de um cliente nunca podiam
+            vazar para o outro.
+          </p>
+          <p>
+            A solução existente era um mosaico de planilhas, com fechamentos
+            mensais artesanais. Lento, frágil e impossível de auditar.
+          </p>
+        </div>
+      </div>
+
+      <!-- SOLUCAO -->
+      <div class="detail-section" data-reveal>
+        <div class="label">A solução</div>
+        <div class="body">
+          <p>
+            Um <strong>BI multi-tenant</strong> com isolamento de dados na
+            camada de Power Query: parâmetro de tenant injetado no
+            <code>RLS</code>, filtros propagados na origem, e três
+            personas de relatório consumindo o mesmo modelo semântico.
+          </p>
+          <pre class="code-block">
+<span class="token-comment">// Power Query — filtro por tenant na origem</span>
+<span class="token-keyword">let</span>
+    Source = <span class="token-function">Sql.Database</span>(<span class="token-string">"warehouse"</span>, <span class="token-string">"facilita"</span>),
+    Tenant = <span class="token-function">Parameter.Tenant</span>,
+    Filtered = <span class="token-function">Table.SelectRows</span>(
+        Source{[Schema=<span class="token-string">"dw"</span>, Item=<span class="token-string">"fato_atendimento"</span>]}[Data],
+        <span class="token-keyword">each</span> [tenant_id] = Tenant
+    )
+<span class="token-keyword">in</span>
+    Filtered</pre>
+          <p>
+            Três <code>app workspaces</code> distintos no Power BI Service,
+            cada um com sua RLS rule, alimentados pelo mesmo dataset
+            certificado. Atualização incremental semanal para os
+            dashboards de operação.
+          </p>
+        </div>
+      </div>
+
+      <!-- DESTAQUES -->
+      <div class="detail-section" data-reveal>
+        <div class="label">Destaques técnicos</div>
+        <div class="body">
+          <h3>Métricas com tempo dinâmico</h3>
+          <p>
+            DAX com <code>SELECTEDVALUE</code> e <code>SWITCH</code> para que
+            o mesmo card calcule MTD, QTD ou YTD conforme o filtro de
+            calendário do usuário — sem duplicar medidas no modelo.
+          </p>
+          <pre class="code-block">
+<span class="token-comment">-- DAX — receita time-aware</span>
+Receita Periodo =
+<span class="token-keyword">VAR</span> Periodo = <span class="token-function">SELECTEDVALUE</span>(d_Periodo[Codigo], <span class="token-string">"MTD"</span>)
+<span class="token-keyword">VAR</span> Base    = [Receita Bruta]
+<span class="token-keyword">RETURN</span>
+    <span class="token-function">SWITCH</span>(
+        Periodo,
+        <span class="token-string">"MTD"</span>, <span class="token-function">CALCULATE</span>(Base, <span class="token-function">DATESMTD</span>(d_Calendario[Data])),
+        <span class="token-string">"QTD"</span>, <span class="token-function">CALCULATE</span>(Base, <span class="token-function">DATESQTD</span>(d_Calendario[Data])),
+        <span class="token-string">"YTD"</span>, <span class="token-function">CALCULATE</span>(Base, <span class="token-function">DATESYTD</span>(d_Calendario[Data])),
+        Base
+    )</pre>
+
+          <h3>Decisões de arquitetura</h3>
+          <ul>
+            <li>Star schema enxuto: 1 fato, 6 dimensões. Sem snowflake.</li>
+            <li>Camadas de pasta no Power Query: <code>0_Source</code> → <code>1_Stage</code> → <code>2_Clean</code> → <code>3_Model</code>.</li>
+            <li>Convenção de nomes consistente: <code>f_*</code> para fatos, <code>d_*</code> para dimensões, <code>_med_*</code> para grupo de medidas.</li>
+            <li>Documentação inline em cada query, em português, com decisão e contexto.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- IMPACTO -->
+      <div class="detail-section" data-reveal>
+        <div class="label">Impacto</div>
+        <div class="body">
+          <div class="impact-grid-detail">
+            <div class="card">
+              <div class="v">3</div>
+              <div class="l">audiências<br>servidas pelo mesmo modelo</div>
+            </div>
+            <div class="card">
+              <div class="v">Semanal</div>
+              <div class="l">atualizações semanais<br>em produção</div>
+            </div>
+            <div class="card">
+              <div class="v">0</div>
+              <div class="l">vazamentos<br>cross-tenant em 12 meses</div>
+            </div>
+          </div>
+          <p>
+            O fechamento mensal, antes feito em planilhas e revisado
+            durante dias, virou um relatório consultado em tempo real
+            pela diretoria. Os supervisores deixaram de pedir extrações
+            ao time de dados — passaram a navegar o próprio recorte.
+          </p>
+          <p>
+            Mais importante: o modelo virou referência interna. Outros
+            BIs da casa adotaram a mesma convenção de pastas, camadas e
+            nomenclatura.
+          </p>
+        </div>
+      </div>
+
+      <!-- NAV BETWEEN PROJECTS -->
+      <div class="detail-nav">
+        <a href="index.html#projetos">
+          <span class="hint">/// voltar</span>
+          ← todos os projetos
+        </a>
+        <a href="associacao-bi.html">
+          <span class="hint">/// próximo</span>
+          BI Associação →
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">
+      <span class="logo-mark">MARCELA SILVA</span>
+      <span>Feito com dados e intenção.</span>
+      <span>© <span id="year">2026</span> Marcela Silva</span>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

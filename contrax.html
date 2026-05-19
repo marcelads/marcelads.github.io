@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ContraX Extract — Marcela Silva</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/png" href="logo-m.png" />
+</head>
+<body class="detail">
+
+  <div class="bg-orb" aria-hidden="true"></div>
+  <div class="bg-orb two" aria-hidden="true"></div>
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div id="cursor-ring" class="hidden" aria-hidden="true"></div>
+  <div id="cursor-dot" class="hidden" aria-hidden="true"></div>
+
+  <nav class="topnav">
+    <div class="container">
+      <a href="index.html" class="nav-logo">
+        <span class="m-mark" style="background-image:url('logo-m.png')" aria-hidden="true"></span>
+        <span class="full">MARCELA SILVA</span>
+        <span class="short">MS.</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html#hero">início</a></li>
+        <li><a href="index.html#sobre">sobre</a></li>
+        <li><a href="index.html#projetos" class="active">projetos</a></li>
+        <li><a href="index.html#contato">contato</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section id="hero">
+    <div class="container">
+      <a href="index.html#projetos" class="back-link">← Voltar aos projetos</a>
+
+      <div class="detail-header" data-reveal>
+        <div class="num">// 04 — ContraX Extract</div>
+        <h1>PDF → Excel.<br>Em um clique.</h1>
+        <div class="tech">
+          <span class="badge">Python</span>
+          <span class="badge">pdfplumber</span>
+          <span class="badge">openpyxl</span>
+          <span class="badge">Tkinter</span>
+        </div>
+      </div>
+
+      <div class="detail-hero-img" data-reveal>
+        <img src="contrax.svg" alt="Interface ContraX Extract" />
+      </div>
+
+      <div class="detail-section" data-reveal>
+        <div class="label">Contexto</div>
+        <div class="body">
+          <p>
+            Setor de RH com volume mensal pesado de contracheques em PDF —
+            cada um com um layout ligeiramente diferente. A consolidação
+            era feita à mão, em Excel, levando horas e gerando erros que
+            só apareciam meses depois.
+          </p>
+        </div>
+      </div>
+
+      <div class="detail-section" data-reveal>
+        <div class="label">A solução</div>
+        <div class="body">
+          <p>
+            Aplicativo desktop em <code>Tkinter</code> com fluxo simples:
+            arrasta os PDFs, clica em extrair, recebe um Excel
+            estruturado. Aba separada para alertas — qualquer
+            inconsistência (bruto ≠ líquido + descontos, campos
+            faltando, layouts não reconhecidos) vai para revisão
+            manual antes da exportação.
+          </p>
+          <pre class="code-block">
+<span class="token-comment"># core.py — extrator com fallback</span>
+<span class="token-keyword">def</span> <span class="token-function">extract</span>(pdf_path: Path) -> Record:
+    <span class="token-keyword">with</span> pdfplumber.<span class="token-function">open</span>(pdf_path) <span class="token-keyword">as</span> doc:
+        text = <span class="token-string">"\n"</span>.<span class="token-function">join</span>(p.<span class="token-function">extract_text</span>() <span class="token-keyword">for</span> p <span class="token-keyword">in</span> doc.pages)
+
+    layout = <span class="token-function">detect_layout</span>(text)              <span class="token-comment"># 1 de 4 templates</span>
+    fields = LAYOUTS[layout].<span class="token-function">parse</span>(text)
+    <span class="token-function">validate</span>(fields)                         <span class="token-comment"># raise se nao bate</span>
+    <span class="token-keyword">return</span> Record(**fields, source_hash=<span class="token-function">sha256</span>(pdf_path))</pre>
+        </div>
+      </div>
+
+      <div class="detail-section" data-reveal>
+        <div class="label">Destaques técnicos</div>
+        <div class="body">
+          <h3>Layouts como plug-ins</h3>
+          <p>
+            Cada template de contracheque é uma classe com método
+            <code>parse(text) -> dict</code>. Adicionar um novo é
+            uma classe nova, sem tocar no resto do código.
+          </p>
+          <h3>Aba de alertas, não de erros</h3>
+          <ul>
+            <li>Inconsistências não param a execução — viram itens revisáveis.</li>
+            <li>Cada alerta mostra o PDF de origem, o campo problemático e o valor esperado.</li>
+            <li>O usuário decide: editar e exportar, ou pular e seguir.</li>
+          </ul>
+          <h3>Excel como contrato</h3>
+          <p>
+            O <code>openpyxl</code> escreve em template fixo com headers
+            preservados, validação por coluna e formatação condicional
+            já embutida. Importável direto no sistema do cliente.
+          </p>
+        </div>
+      </div>
+
+      <div class="detail-section" data-reveal>
+        <div class="label">Impacto</div>
+        <div class="body">
+          <div class="impact-grid-detail">
+            <div class="card"><div class="v">Horas→ 5min</div><div class="l">tempo de consolidação<br>mensal</div></div>
+            <div class="card"><div class="v">4</div><div class="l">layouts<br>suportados</div></div>
+            <div class="card"><div class="v">≈ 100%</div><div class="l">taxa de extração<br>automática</div></div>
+          </div>
+          <p>
+            O ganho real não foi só de tempo: foi a confiança no número
+            chegando ao destino — auditável, rastreável até o PDF de
+            origem.
+          </p>
+        </div>
+      </div>
+
+      <div class="detail-nav">
+        <a href="performance-hub.html"><span class="hint">/// anterior</span>← Performance Hub</a>
+        <a href="index.html#projetos"><span class="hint">/// voltar</span>todos os projetos →</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="container">
+      <span class="logo-mark">MARCELA SILVA</span>
+      <span>Feito com dados e intenção.</span>
+      <span>© <span id="year">2026</span> Marcela Silva</span>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
