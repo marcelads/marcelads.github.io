@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Real-Time BI Analytics</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{width:100%;height:100vh;overflow:hidden;font-family:Inter,sans-serif;background:#000;position:relative;}
+  canvas#m1{position:absolute;inset:0;width:100%;height:100%;}
+  .fade-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.3) 0%,rgba(0,0,0,0.7) 60%,#000 100%);z-index:1;pointer-events:none;}
+  .content{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:clamp(2rem,5vw,5rem);}
+  .badge{display:inline-flex;align-items:center;gap:6px;background:rgba(0,255,100,0.1);border:1px solid rgba(0,255,100,0.3);color:#00ff64;font-size:11px;letter-spacing:2px;text-transform:uppercase;padding:5px 14px;border-radius:4px;margin-bottom:20px;opacity:0;animation:mfade .8s 1.2s forwards;}
+  .badge-dot{width:6px;height:6px;border-radius:50%;background:#00ff64;animation:blink 1s infinite;flex-shrink:0;}
+  .headline{font-size:clamp(36px,5vw,58px);font-weight:700;color:#fff;line-height:1.1;margin-bottom:16px;opacity:0;animation:mfade .8s 1.5s forwards;}
+  .headline span{color:#00ff64;}
+  .divider{width:0;height:2px;background:#00ff64;margin-bottom:16px;animation:mexp .8s 1.8s forwards;}
+  .subtitle{font-size:16px;color:rgba(255,255,255,0.5);max-width:420px;line-height:1.8;opacity:0;animation:mfade .8s 2s forwards;}
+  .stats{display:flex;gap:clamp(1rem,3vw,2rem);margin-top:2rem;flex-wrap:wrap;opacity:0;animation:mfade .8s 2.3s forwards;}
+  .stat-label{font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.3);text-transform:uppercase;margin-bottom:4px;}
+  .stat-value{font-size:28px;font-weight:700;color:#00ff64;}
+  @keyframes mfade{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+  @keyframes mexp{from{opacity:0;width:0}to{opacity:1;width:60px}}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+</style>
+</head>
+<body>
+<canvas id="m1"></canvas>
+<div class="fade-overlay"></div>
+<div class="content">
+  <div class="badge"><div class="badge-dot"></div>Live Data Feed</div>
+  <div class="headline">Real-Time<br><span>BI Analytics</span></div>
+  <div class="divider"></div>
+  <div class="subtitle">Monitor every KPI as it happens. Your data pipeline visualized in milliseconds.</div>
+  <div class="stats">
+    <div><div class="stat-label">Data Points</div><div class="stat-value">2.4M</div></div>
+    <div><div class="stat-label">Dashboards</div><div class="stat-value">148</div></div>
+    <div><div class="stat-label">Uptime</div><div class="stat-value">99.9%</div></div>
+  </div>
+</div>
+<script>
+var mc=document.getElementById('m1'),mx=mc.getContext('2d'),mw,mh,dr;
+var ch='01アイウエオカキクケコABCDEF0123456789';
+function mi(){mw=mc.width=window.innerWidth;mh=mc.height=window.innerHeight;dr=Array(Math.floor(mw/16)).fill(1);}
+function md(){
+  mx.fillStyle='rgba(0,0,0,0.05)';mx.fillRect(0,0,mw,mh);mx.font='13px monospace';
+  dr.forEach(function(y,i){var c=ch[Math.floor(Math.random()*ch.length)];mx.fillStyle='rgba(0,255,100,'+(Math.random()*.5+.1)+')';mx.fillText(c,i*16,y*16);if(y*16>mh&&Math.random()>.975)dr[i]=0;dr[i]++;});
+}
+mi();setInterval(md,50);window.addEventListener('resize',mi);
+</script>
+</body>
+</html>
