@@ -44,6 +44,8 @@ const templates = [
 
     // Nome do arquivo HTML na mesma pasta
     arquivo: "ilovepowerbi.html",
+    md:      "ilovepowerbi.md",
+    dax:     "ilovepowerbi.txt",   // ← adiciona isso
 
     // Prompt copiado pelo botão "Copiar Prompt MD"
     // Cole aqui o markdown completo de identidade visual
