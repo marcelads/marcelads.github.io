@@ -1852,3 +1852,9 @@ body.detail #hero {
     overflow-x: hidden;
   }
 }
+
+.detail-hero-img {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
